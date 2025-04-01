@@ -1,5 +1,5 @@
-# Vitis HLS dot product
-This repository automates IP building for Vitis HLS GEMM component. It also provides application bare-metal code.
+# Vitis HLS GEMM
+This repository automates IP building for Vitis HLS GEMM component and provides application bare-metal code.
 It is all arranged to be UninaSoC directories-compliant.
 
 You can clone all git repository or copy only fetch_sources.sh.
