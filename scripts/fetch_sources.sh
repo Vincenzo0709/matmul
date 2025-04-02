@@ -2,7 +2,7 @@
 # Author: Vincenzo Merola <vincenzo.merola2@unina.it>
 
 # Description:
-# This script downloads Vitis HLS GEMM sources and flattens them into an rtl/ directory.
+# This script downloads Vitis HLS GEMM sources and flattens them into a build/ directory.
 
 # To execute: ./fetch_sources.sh
 # To execute you need:
@@ -15,17 +15,17 @@ GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-COMP_NAME=matmul
-GIT_URL=https://github.com/Vincenzo0709/Vitis_HLS_accelerators.git
-GIT_TAG=${COMP_NAME}
-CLONE_DIR=Vitis_HLS_accelerators
-HW=${CLONE_DIR}/hw
+GIT_URL=https://github.com/Vincenzo0709/matmul.git
+GIT_TAG=main
+CLONE_DIR=matmul
+COMP_NAME=${CLONE_DIR}
 
 # Display help
 Help()
 {
    echo
-   echo "This script downloads Vitis HLS matmul sources and flattens them into an rtl/ directory."
+   echo "This script downloads from Git or directly builds Vitis HLS vdotprod accelerator sources"
+   echo "and flattens rtl files, Vivado ip directory and ip .zip into a build/ directory."
    echo
    echo "Syntax: fetch_source.sh [--option]"
    echo
@@ -34,42 +34,74 @@ Help()
    echo
 }
 
-Flatten()
+GitFlatten()
 {
-    # Create build dir
-    if ! [ -d hw/ ]; then
-        mkdir hw
-    fi
-    cd hw
-    rm -rf build/
-    mkdir build/
-    mkdir build/rtl
-    mkdir build/ip
 
-    # Clone repo and update submodule to specific branch
-    printf "${YELLOW}[FETCH_SOURCES] Cloning source repository${NC}\n"
+    printf "\n${GREEN}[FETCH_SOURCES] Fetching with git${NC}\n"
+
+    # Creating build/ dir
+    rm -rf build/
+    mkdir -p build/rtl build/ip
+    BUILD="`pwd -P`/build"
+
+    # Cloning repo
+    printf "\n${YELLOW}[FETCH_SOURCES] Cloning source repository${NC}\n"
     git clone ${GIT_URL} -b ${GIT_TAG} ${CLONE_DIR}
 
     # Clone Bender (future development)
-    # printf "${YELLOW}[FETCH_SOURCES] Download Bender${NC}\n"
+    # printf "\n${YELLOW}[FETCH_SOURCES] Download Bender${NC}\n"
+    # curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh
+
+    cd ${CLONE_DIR}/hw
+    # Synthesizing and copying verilog rtl files
+    printf "\n${YELLOW}[FETCH_SOURCES] Starting synthesis${NC}\n"
+    make syn
+    cp -r ${COMP_NAME}/hls/syn/verilog/* ${BUILD}/rtl
+
+    # Packaging and copying Vivado ip files and ip .zip
+    printf "\n${YELLOW}[FETCH_SOURCES] Starting packaging${NC}\n"
+    make package
+    cp ${COMP_NAME}_hls.zip ${BUILD}/
+    cp -r ${COMP_NAME}/hls/impl/ip/* ${BUILD}/ip
+    
+    cd ${WORK_DIR}
+    # Deleting the cloned repo
+    printf "\n${YELLOW}[FETCH_SOURCES] Cleaning all artifacts${NC}\n"
+    sudo rm -r ${CLONE_DIR}
+    printf "\n${GREEN}[FETCH_SOURCES] Completed${NC}\n"
+
+}
+
+Flatten() {
+    
+    printf "\n${GREEN}[FETCH_SOURCES] Fetching without git${NC}\n"
+
+    # Creating build/ dir
+    cd hw
+    rm -rf build/
+    mkdir -p build/rtl build/ip
+    BUILD="`pwd -P`/build"
+
+    # Clone Bender (future development)
+    # printf "\n${YELLOW}[FETCH_SOURCES] Download Bender${NC}\n"
     # curl --proto '=https' --tlsv1.2 https://pulp-platform.github.io/bender/init -sSf | sh
 
     # Copy all RTL files into rtl dir
-    printf "${YELLOW}[FETCH_SOURCES] Copying all sources into rtl${NC}\n"
-    cd ${HW}
+    printf "\n${YELLOW}[FETCH_SOURCES] Copying all sources into rtl${NC}\n"
+
+    # Synthesizing and copying verilog rtl files
     make syn
-    cp -r ${COMP_NAME}/hls/syn/verilog/* ../../build/rtl
+    cp -r ${COMP_NAME}/hls/syn/verilog/* ${BUILD}/rtl
+
+    # Packaging and copying Vivado ip files and ip .zip
     make package
-    cp ${COMP_NAME}_hls.zip ../../build/
-    cp -r ${COMP_NAME}/hls/impl/ip/* ../../build/ip
-    cd ../..
+    mv ${COMP_NAME}_hls.zip ${BUILD}
+    cp -r ${COMP_NAME}/hls/impl/ip/* ${BUILD}/ip
 
-    # Delete the cloned repo
-    printf "${YELLOW}[FETCH_SOURCES] Cleaning all artifacts${NC}\n"
-    sudo rm -r ${CLONE_DIR}
-    printf "${GREEN}[FETCH_SOURCES] Completed${NC}\n"
+    cd ${WORK_DIR}
+    printf "\n${GREEN}[FETCH_SOURCES] Completed${NC}\n"
+
 }
-
 
 OPTS=$(getopt -o h --long help -n 'fetch_sources.sh' -- "$@")
 eval set -- "$OPTS"
@@ -83,6 +115,7 @@ if [ "$OPTS" != " --" ]; then
                 exit 0
                 ;;
             --)
+                # Terminating symbol
                 shift
                 break
                 ;;
@@ -98,9 +131,11 @@ fi
 
 # Moving to right directory (if you cloned the whole repository instead of using only fetch_sources.sh)
 cd "$(dirname "$0")" ; printf "\n${GREEN}[FETCH_SOURCES] Starting from directory `pwd -P`${NC}\n"
+WORK_DIR=`pwd -P`
 if [ "$(basename `pwd -P`)" == "scripts" ]; then
-    cd .. ; printf "${GREEN}[FETCH_SOURCES] Moving to directory `pwd -P`${NC}\n"
+    cd .. ; printf "\n${GREEN}[FETCH_SOURCES] Moving to directory `pwd -P`${NC}\n"
+    WORK_DIR=`pwd -P`
+    Flatten
+else
+    GitFlatten
 fi
-
-Flatten
-
