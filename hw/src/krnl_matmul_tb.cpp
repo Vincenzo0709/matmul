@@ -2,13 +2,13 @@
 #include "krnl_matmul.h"
 using namespace std;
 
-bool check_values(uint32_t *out, const int expctd) {
+bool check_values(uint32_t *axi_mm) {
     
     for (int i=0; i<DATA_SIZE; i++) {
         
         for (int j=0; j<DATA_SIZE; j++) {
 
-            if (expctd != out[i*DATA_SIZE + j]) {
+            if (EXPCTD != axi_mm[OFFSET_C + (i*DATA_SIZE + j)]) {
                 cout << endl << "[ERROR] Not expected result!" << endl;
                 return false;
             }
@@ -23,25 +23,22 @@ bool check_values(uint32_t *out, const int expctd) {
 
 int main(int argc, const char **argv) {
 
-    uint32_t A[DATA_SIZE*DATA_SIZE];
-    uint32_t B[DATA_SIZE*DATA_SIZE];
-    uint32_t out[DATA_SIZE*DATA_SIZE];
-    const int expctd = DATA_SIZE;
+    uint32_t axi_mm[SIZE_MM];
 
     for (int i=0; i<DATA_SIZE; i++) {
         
         for (int j=0; j<DATA_SIZE; j++) {
 
-            A[i*DATA_SIZE + j] = 1;
-            B[i*DATA_SIZE + j] = 1;
-            out[i*DATA_SIZE + j] = 0;
+            axi_mm[OFFSET_A + (i*DATA_SIZE + j)] = 1;
+            axi_mm[OFFSET_B + (i*DATA_SIZE + j)] = 1;
+            axi_mm[OFFSET_C + (i*DATA_SIZE + j)] = 0;
 
         }
 
     }
 
-    krnl_matmul(A, B, out);
+    krnl_matmul(axi_mm);
 
-    return !check_values(out, expctd);
+    return !check_values(axi_mm);
 
 }
