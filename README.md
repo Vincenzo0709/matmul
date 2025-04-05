@@ -2,7 +2,7 @@
 This repository automates IP building for Vitis HLS GEMM accelerator and provides bare-metal application code.
 It is all arranged to be UninaSoC directories-compliant.
 
-You can clone all git repository or use only scritpts/fetch_sources.sh.
+You can clone all git repository or use only scripts/fetch_sources.sh.
 - If you clone all repo, outputs will be in hw/build/ directory;
 - If you use fetch_sources.sh only, outputs will be in build/ directory.
 
