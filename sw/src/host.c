@@ -7,7 +7,7 @@
 #define Xkrnl_GIE                   (Xkrnl_BASE + XKRNL_MATMUL_CONTROL_ADDR_GIE)
 #define Xkrnl_IER                   (Xkrnl_BASE + XKRNL_MATMUL_CONTROL_ADDR_IER)
 #define Xkrnl_ISR                   (Xkrnl_BASE + XKRNL_MATMUL_CONTROL_ADDR_ISR)
-#define Xkrnl_A_ADDR                (Xkrnl_BASE + XKRNL_MATMUL_CONTROL_ADDR_AXI_MM_DATA)
+#define Xkrnl_AXI_ADDR              (Xkrnl_BASE + XKRNL_MATMUL_CONTROL_ADDR_AXI_MM_DATA)
 
 #define AP_START                    (0x00000001)
 #define AP_DONE                     (0x00000002)
@@ -16,14 +16,14 @@
 #define AP_CONTINUE                 (0x00000010)
 #define AP_INTERRUPT                (0x00000020)
 
-#define DATA_SIZE 32
-#define EXPCTD DATA_SIZE
+#define SIZE 32
+#define EXPCTD SIZE
 
 #define OFFSET_A 0
-#define OFFSET_B DATA_SIZE*DATA_SIZE
-#define OFFSET_C 2*DATA_SIZE*DATA_SIZE
+#define OFFSET_B SIZE*SIZE
+#define OFFSET_C 2*SIZE*SIZE
 
-#define SIZE_MM 3*DATA_SIZE*DATA_SIZE
+#define SIZE_MM 3*SIZE*SIZE
 
 void initialize_data(uint32_t axi_mm[SIZE_MM]) {
 
@@ -64,7 +64,7 @@ bool is_kernel_ready() {
     return ( (Xil_In32(Xkrnl_Control) && AP_READY) == AP_READY );
 }
 
-bool check_results(uint32_t out[SIZE_MM]) {
+bool check_results(uint32_t axi_mm[SIZE_MM]) {
 
     for (int i=0; i<DATA_SIZE; i++) {
 

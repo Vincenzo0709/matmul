@@ -1,51 +1,83 @@
 #include "krnl_matmul.h"
 
-void load_input(const uint32_t * in, uint32_t mat[DATA_SIZE][DATA_SIZE], const uint32_t offset) {
+void load_input(const uint512_t * in, uint32_t mat[SIZE][SIZE], const uint32_t offset) {
     
-    for (int i=0; i<DATA_SIZE; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min = DATA_SIZE max = DATA_SIZE
+    int i=0, j=0;
+    uint512_t buff;
+    
+    for (int k=0; k<NUM_ITER; k++) {
+        #pragma HLS LOOP_TRIPCOUNT min = NUM_ITER max = NUM_ITER
 
-        for (int j=0; j<DATA_SIZE; j++) {
-            #pragma HLS LOOP_TRIPCOUNT min = DATA_SIZE max = DATA_SIZE
+        buff = in[offset + k];
+        
+        if (j == SIZE) {
 
-            mat[i][j] = in[offset + (i*DATA_SIZE + j)];
+            j = 0;
+            i++;
 
+        }
+
+        for (int l=0; l<INTERFACE_SIZE; l++) {
+            #pragma HLS LOOP_TRIPCOUNT min = INTERFACE_SIZE max = INTERFACE_SIZE
+
+            #pragma HLS UNROLL factor=INTERFACE_SIZE
+            
+            mat[i][j] = ((uint32_t *)(&buff))[l];
+
+            j++;
+            
         }
 
     }
 
 }
 
-void store_output(uint32_t * out, const uint32_t mat[DATA_SIZE][DATA_SIZE], const uint32_t offset) {
+void store_output(uint512_t * out, const uint32_t mat[SIZE][SIZE], const uint32_t offset) {
 
-    for (int i=0; i<DATA_SIZE; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min = DATA_SIZE max = DATA_SIZE
+    int i=0, j=0;
+    uint512_t buff;
+    
+    for (int k=0; k<NUM_ITER; k++) {
+        #pragma HLS LOOP_TRIPCOUNT min = NUM_ITER max = NUM_ITER
 
-        for (int j=0; j<DATA_SIZE; j++) {
-            #pragma HLS LOOP_TRIPCOUNT min = DATA_SIZE max = DATA_SIZE
+        if (j == SIZE) {
 
-             out[offset + (i*DATA_SIZE + j)] = mat[i][j];
+            j = 0;
+            i++;
 
         }
+
+        for (int l=0; l<INTERFACE_SIZE; l++) {
+            #pragma HLS LOOP_TRIPCOUNT min = INTERFACE_SIZE max = INTERFACE_SIZE
+
+            #pragma HLS UNROLL factor=INTERFACE_SIZE
+            
+            ((uint32_t *)(&buff))[l] = mat[i][j];
+
+            j++;
+
+        }
+
+        out[offset + k] = buff;
 
     }
 
 }
 
-static void execute(const uint32_t A[DATA_SIZE][DATA_SIZE],
-                    const uint32_t B[DATA_SIZE][DATA_SIZE],
-                    uint32_t C[DATA_SIZE][DATA_SIZE]) {
+static void execute(const uint32_t A[SIZE][SIZE],
+                    const uint32_t B[SIZE][SIZE],
+                    uint32_t C[SIZE][SIZE]) {
 
-    for (int i=0; i<DATA_SIZE; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min = DATA_SIZE max = DATA_SIZE
+    for (int i=0; i<SIZE; i++) {
+        #pragma HLS LOOP_TRIPCOUNT min = SIZE max = SIZE
 
         
-        for (int j=0; j<DATA_SIZE; j++) {
-            #pragma HLS LOOP_TRIPCOUNT min = DATA_SIZE max = DATA_SIZE
+        for (int j=0; j<SIZE; j++) {
+            #pragma HLS LOOP_TRIPCOUNT min = SIZE max = SIZE
 
             uint32_t outsum = 0;
-            for (int k=0; k<DATA_SIZE; k++) {
-                #pragma HLS LOOP_TRIPCOUNT min = DATA_SIZE max = DATA_SIZE
+            for (int k=0; k<SIZE; k++) {
+                #pragma HLS LOOP_TRIPCOUNT min = SIZE max = SIZE
                 
                 outsum += A[i][k] * B[k][j];
 
@@ -61,13 +93,13 @@ static void execute(const uint32_t A[DATA_SIZE][DATA_SIZE],
 
 }
 
-void krnl_matmul(uint32_t *axi_mm) {
+void krnl_matmul(uint512_t *axi_mm) {
     
     #pragma HLS INTERFACE m_axi port = axi_mm depth = SIZE_MM bundle = gmem0
 
-    uint32_t A[DATA_SIZE][DATA_SIZE];
-    uint32_t B[DATA_SIZE][DATA_SIZE];
-    uint32_t C[DATA_SIZE][DATA_SIZE];
+    uint32_t A[SIZE][SIZE];
+    uint32_t B[SIZE][SIZE];
+    uint32_t C[SIZE][SIZE];
 
     // #pragma HLS DATAFLOW
     load_input(axi_mm, A, OFFSET_A);

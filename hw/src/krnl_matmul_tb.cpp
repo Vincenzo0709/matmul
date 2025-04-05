@@ -8,7 +8,7 @@ bool check_values(uint32_t *axi_mm) {
         
         for (int j=0; j<DATA_SIZE; j++) {
 
-            if (EXPCTD != axi_mm[OFFSET_C + (i*DATA_SIZE + j)]) {
+            if (EXPCTD != axi_mm[OFF_C + (i*DATA_SIZE + j)]) {
                 cout << endl << "[ERROR] Not expected result!" << endl;
                 return false;
             }
@@ -29,9 +29,9 @@ int main(int argc, const char **argv) {
         
         for (int j=0; j<DATA_SIZE; j++) {
 
-            axi_mm[OFFSET_A + (i*DATA_SIZE + j)] = 1;
-            axi_mm[OFFSET_B + (i*DATA_SIZE + j)] = 1;
-            axi_mm[OFFSET_C + (i*DATA_SIZE + j)] = 0;
+            axi_mm[OFF_A + (i*DATA_SIZE + j)] = 1;
+            axi_mm[OFF_B + (i*DATA_SIZE + j)] = 1;
+            axi_mm[OFF_C + (i*DATA_SIZE + j)] = 0;
 
         }
 
