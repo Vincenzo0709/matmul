@@ -7,7 +7,11 @@ You can clone all git repository or use only scripts/fetch_sources.sh.
 - If you use fetch_sources.sh only, outputs will be in build/ directory.
 
 ## Algorithm description
+It executes a General Matrix Multiply:
 
+$$ C = A \cdot B $$
+
+In this version there are no particular optimizations, and the kernel uses three different AXI master interfaces to access A, B and C.
 
 ## Hardware build
 To compile HLS and package the IP:
@@ -26,12 +30,11 @@ Outputs will be located in build/ directory.
 
 ## Application build
 The bare-metal application is already arranged to be UninaSoC directories-compliant.
-You can test if it compiles by using Makefile (you need riscv bare-metal toolchain).
-
-After importing on UninaSoC some files must be deleted:
-* startup/ dir 
-* Makefile_test is not needed for UninaSoC
-
-To test compilation:
+You can test if it compiles by using Makefile_test (you need riscv bare-metal toolchain):
 
     make -f Makefile_test
+
+After importing on UninaSoC some files can be deleted:
+* startup/ directory 
+* Makefile_test
+are not needed.
