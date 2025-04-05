@@ -35,6 +35,7 @@ You can test if it compiles by using Makefile_test (you need riscv bare-metal to
     make -f Makefile_test
 
 After importing on UninaSoC some files can be deleted:
-* startup/ directory 
-* Makefile_test
+- startup/ directory 
+- Makefile_test
+
 are not needed.
