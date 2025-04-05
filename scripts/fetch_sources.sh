@@ -23,15 +23,18 @@ COMP_NAME=${CLONE_DIR}
 # Display help
 Help()
 {
-   echo
-   echo "This script downloads from Git or directly builds Vitis HLS vdotprod accelerator sources"
-   echo "and flattens rtl files, Vivado ip directory and ip .zip into a build/ directory."
-   echo
-   echo "Syntax: fetch_source.sh [--option]"
-   echo
-   echo "options:"
-   echo "-h | --help            Prints help"
-   echo
+   cat << EOF
+
+This script downloads from Git or directly builds Vitis HLS vdotprod accelerator sources
+and flattens rtl files, Vivado ip directory and ip .zip into a build/ directory.
+
+Syntax: fetch_source.sh [--option]
+
+options:
+    -h | --help            Prints help
+
+EOF
+
 }
 
 GitFlatten()
@@ -42,7 +45,7 @@ GitFlatten()
     # Creating build/ dir
     rm -rf build/
     mkdir -p build/rtl build/ip
-    BUILD="`pwd -P`/build"
+    BUILD=$(pwd -P)/build
 
     # Cloning repo
     printf "\n${YELLOW}[FETCH_SOURCES] Cloning source repository${NC}\n"
@@ -80,7 +83,7 @@ Flatten() {
     cd hw
     rm -rf build/
     mkdir -p build/rtl build/ip
-    BUILD="`pwd -P`/build"
+    BUILD=$(pwd -P)/build
 
     # Clone Bender (future development)
     # printf "\n${YELLOW}[FETCH_SOURCES] Download Bender${NC}\n"
@@ -130,11 +133,11 @@ fi
 
 
 # Moving to right directory (if you cloned the whole repository instead of using only fetch_sources.sh)
-cd "$(dirname "$0")" ; printf "\n${GREEN}[FETCH_SOURCES] Starting from directory `pwd -P`${NC}\n"
+cd "$(dirname "$0")" ; printf "\n${GREEN}[FETCH_SOURCES] Starting from directory $(pwd -P)${NC}\n"
 WORK_DIR=`pwd -P`
-if [ "$(basename `pwd -P`)" == "scripts" ]; then
-    cd .. ; printf "\n${GREEN}[FETCH_SOURCES] Moving to directory `pwd -P`${NC}\n"
-    WORK_DIR=`pwd -P`
+if [ "$(basename $(pwd -P))" == "scripts" ]; then
+    cd .. ; printf "\n${GREEN}[FETCH_SOURCES] Moving to directory $(pwd -P)${NC}\n"
+    WORK_DIR=$(pwd -P)
     Flatten
 else
     GitFlatten
