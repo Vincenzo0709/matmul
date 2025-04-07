@@ -11,6 +11,7 @@ CSIM = ${VITIS_HLS} --csim
 COSIM = ${VITIS_HLS} --cosim
 SYN = ${VPP} ${VFLAGS}
 PACK = ${VITIS_HLS} --package
+IMPL = ${VITIS_HLS} --impl
 IP = ${DIR}_hls
 
 CONFIG = --config src/hls_config.cfg
@@ -50,6 +51,15 @@ package:
 	@echo "Packaging IP..."
 	${PACK} ${CONFIG} ${WORK_DIR}
 	@echo "Packaging ended"
+	@echo
+
+
+.PHONY: impl
+impl:
+	@echo
+	@echo "Running implementation"
+	${IMPL} ${CONFIG} ${WORK_DIR}
+	@echo "Implementation ended"
 	@echo
 
 
