@@ -68,18 +68,27 @@ static void execute(const uint32_t A[SIZE][SIZE],
                     const uint32_t B[SIZE][SIZE],
                     uint32_t C[SIZE][SIZE]) {
 
-    for (int i=0; i<SIZE; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min = SIZE max = SIZE
+    for (int ti=0; ti<N_TILES; ti++) {
+        #pragma HLS LOOP_TRIPCOUNT min = N_TILES max = N_TILES
 
-        
-        for (int j=0; j<SIZE; j++) {
-            #pragma HLS LOOP_TRIPCOUNT min = SIZE max = SIZE
+        for (int tj=0; tj<N_TILES; tj++) {
+            #pragma HLS LOOP_TRIPCOUNT min = N_TILES max = N_TILES
 
             uint32_t outsum = 0;
-            for (int k=0; k<SIZE; k++) {
-                #pragma HLS LOOP_TRIPCOUNT min = SIZE max = SIZE
-                
-                outsum += A[i][k] * B[k][j];
+            for (int ni=0; ni<TILE_SIZE; ni++) {
+                #pragma HLS LOOP_TRIPCOUNT min = TILE_SIZE max = TILE_SIZE
+
+                for (int nj=0; nj<TILE_SIZE; nj++) {
+                    #pragma HLS LOOP_TRIPCOUNT min = TILE_SIZE max = TILE_SIZE
+
+                    for (int k=0; k<SIZE; k++) {
+                        #pragma HLS LOOP_TRIPCOUNT min = SIZE max = SIZE
+                            
+                        outsum += A[i][k] * B[k][j];
+
+                    }
+
+                }
 
             }
 
@@ -98,6 +107,7 @@ void krnl_matmul(uint512_t *axi_mm) {
     #pragma HLS INTERFACE m_axi port = axi_mm depth = SIZE_MM bundle = gmem0
 
     uint32_t A[SIZE][SIZE];
+    #pragma HLS ARRAY_PARTITION A
     uint32_t B[SIZE][SIZE];
     uint32_t C[SIZE][SIZE];
 

@@ -9,6 +9,10 @@
 #define SIZE 32
 #define INT_BITS 32
 
+// Tiles
+#define TILE_SIZE 16
+#define N_TILES (SIZE / TILE_SIZE)
+
 // Interface is 512 bits -> 16 uint32_t elements
 #define INTERFACE_BITS 512
 #define INTERFACE_SIZE (INTERFACE_BITS / INT_BITS)
